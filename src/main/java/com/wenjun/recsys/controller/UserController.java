@@ -21,6 +21,7 @@ import javax.validation.Valid;
  */
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(allowedHeaders = "*",allowCredentials = "true")
 public class UserController {
 
     private static final String CURRENT_USER_SESSION = "CURRENT_USER_SESSION";
