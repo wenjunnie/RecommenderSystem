@@ -1,4 +1,4 @@
-package com.wenjun.recsys.common;
+package com.wenjun.recsys.response;
 
 import lombok.Data;
 

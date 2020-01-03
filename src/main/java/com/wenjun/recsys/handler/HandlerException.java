@@ -1,6 +1,6 @@
 package com.wenjun.recsys.handler;
 
-import com.wenjun.recsys.common.CommonReturnType;
+import com.wenjun.recsys.response.CommonReturnType;
 import com.wenjun.recsys.enums.EmBusinessError;
 import com.wenjun.recsys.error.BusinessException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -31,11 +31,11 @@ public class HandlerException {
             map.put("errCode", businessException.getErrCode());
             map.put("errMsg", businessException.getErrMsg());
         } else if (e instanceof ServletRequestBindingException) {//传参错误（405）
-            map.put("errCode", EmBusinessError.UNKNOWN_ERROR);
-            map.put("errMsg", "url路由绑定问题");
+            map.put("errCode", EmBusinessError.BIND_EXCEPTION_ERROR.getErrCode());
+            map.put("errMsg", EmBusinessError.BIND_EXCEPTION_ERROR.getErrMsg());
         } else if (e instanceof NoHandlerFoundException) {//页面404
-            map.put("errCode", EmBusinessError.UNKNOWN_ERROR);
-            map.put("errMsg", "没有找到对应的访问路径");
+            map.put("errCode", EmBusinessError.NO_HANDLER_FOUND.getErrCode());
+            map.put("errMsg", EmBusinessError.NO_HANDLER_FOUND.getErrMsg());
         } else {
             map.put("errCode", EmBusinessError.UNKNOWN_ERROR.getErrCode());
             map.put("errMsg", EmBusinessError.UNKNOWN_ERROR.getErrMsg());

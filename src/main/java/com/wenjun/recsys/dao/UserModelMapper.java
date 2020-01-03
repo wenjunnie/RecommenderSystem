@@ -52,4 +52,6 @@ public interface UserModelMapper {
      * @mbg.generated Thu Jan 02 18:28:34 CST 2020
      */
     int updateByPrimaryKey(UserModel record);
+
+    UserModel selectByTelphone(String telphone);
 }
