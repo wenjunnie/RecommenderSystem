@@ -161,4 +161,10 @@
     from user
     where telphone = #{telphone,jdbcType=VARCHAR}
   </select>
+
+  <select id="countAllUser" resultType="java.lang.Integer">
+    select
+    count(*)
+    from user
+  </select>
 </mapper>

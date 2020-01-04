@@ -14,4 +14,6 @@ public interface UserService {
     UserModel register(UserModel registerUser) throws BusinessException;
     //用户登录
     UserModel login(String telphone, String password) throws BusinessException;
+    //注册用户数量
+    Integer countAllUser();
 }

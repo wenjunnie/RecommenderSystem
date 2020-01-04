@@ -54,4 +54,6 @@ public interface UserModelMapper {
     int updateByPrimaryKey(UserModel record);
 
     UserModel selectByTelphone(String telphone);
+
+    Integer countAllUser();
 }

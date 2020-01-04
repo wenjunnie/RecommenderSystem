@@ -14,6 +14,7 @@ public enum EmBusinessError implements CommonError {
     PARAMETER_VALIDATION_ERROR(10005,"请求参数校验失败"),
     REGISTER_DUP_FAIL(20001,"用户已存在"),
     LOGIN_FAIL(20002,"手机号或密码错误"),
+    ADMIN_NOT_LOGIN(30001,"管理员未登录"),
     ;
 
     private int errCode;
