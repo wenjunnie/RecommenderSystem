@@ -31,7 +31,7 @@ public class ControllerAspect {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
-    @Around("execution(* com.wenjun.recsys.controller.admin.*.*(..)) && @annotation(org.springframework.web.bind.annotation.GetMapping)")
+    @Around("execution(* com.wenjun.recsys.controller.admin.*.*(..)) && @annotation(org.springframework.web.bind.annotation.GetMapping) || @annotation(org.springframework.web.bind.annotation.PostMapping)")
     public Object adminControllerBeforeValidation(ProceedingJoinPoint joinPoint) throws Throwable {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         AdminPermission adminPermission = method.getAnnotation(AdminPermission.class);

@@ -30,11 +30,16 @@
             <property name=  "enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table tableName="user" domainObjectName="UserModel" enableCountByExample="false"
-               enableUpdateByExample="false" enableDeleteByExample="false"
-               enableSelectByExample="false" selectByExampleQueryId="false">
-               <generatedKey column="id" sqlStatement="MySQL" identity="true" />
-        </table>
+<!--        <table tableName="user" domainObjectName="UserModel" enableCountByExample="false"-->
+<!--               enableUpdateByExample="false" enableDeleteByExample="false"-->
+<!--               enableSelectByExample="false" selectByExampleQueryId="false">-->
+<!--               <generatedKey column="id" sqlStatement="MySQL" identity="true" />-->
+<!--        </table>-->
+<!--        <table tableName="seller" domainObjectName="SellerModel" enableCountByExample="false"-->
+<!--               enableUpdateByExample="false" enableDeleteByExample="false"-->
+<!--               enableSelectByExample="false" selectByExampleQueryId="false">-->
+<!--            <generatedKey column="id" sqlStatement="MySQL" identity="true" />-->
+<!--        </table>-->
 <!--        <table schema="DB2ADMIN" tableName="ALLTYPES" domainObjectName="Customer" >-->
 <!--            <property name="useActualColumnNames" value="true"/>-->
 <!--            <generatedKey column="ID" sqlStatement="DB2" identity="true" />-->
