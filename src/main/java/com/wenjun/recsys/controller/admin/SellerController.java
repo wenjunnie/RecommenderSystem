@@ -57,8 +57,8 @@ public class SellerController {
     @GetMapping(value = "/createpage")
     public ModelAndView createPage() {
         ModelAndView modelAndView = new ModelAndView("/seller/create");
-        modelAndView.addObject("CONTROLLER_NAME","create");
-        modelAndView.addObject("ACTION_NAME","home");
+        modelAndView.addObject("CONTROLLER_NAME","seller");
+        modelAndView.addObject("ACTION_NAME","create");
         return modelAndView;
     }
 

@@ -15,6 +15,7 @@ public enum EmBusinessError implements CommonError {
     REGISTER_DUP_FAIL(20001,"用户已存在"),
     LOGIN_FAIL(20002,"手机号或密码错误"),
     ADMIN_NOT_LOGIN(30001,"管理员未登录"),
+    CATEGORY_NAME_DUPLICATED(40001,"品类名已存在"),
     ;
 
     private int errCode;
