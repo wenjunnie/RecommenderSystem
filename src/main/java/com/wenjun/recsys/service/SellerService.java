@@ -18,4 +18,6 @@ public interface SellerService {
     List<SellerModel> selectAll();
     //设置商家启用/禁用状态
     SellerModel changeStatus(Integer id, Integer disabledFlag) throws BusinessException;
+    //统计商户数量
+    Integer countAllSeller();
 }

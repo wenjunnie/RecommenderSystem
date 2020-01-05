@@ -3,6 +3,9 @@ package com.wenjun.recsys.controller.admin;
 import com.wenjun.recsys.aspect.AdminPermission;
 import com.wenjun.recsys.enums.EmBusinessError;
 import com.wenjun.recsys.error.BusinessException;
+import com.wenjun.recsys.service.CategoryService;
+import com.wenjun.recsys.service.SellerService;
+import com.wenjun.recsys.service.ShopService;
 import com.wenjun.recsys.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,15 @@ public class AdminController {
     private UserService userService;
 
     @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private SellerService sellerService;
+
+    @Autowired
+    private ShopService shopService;
+
+    @Autowired
     private HttpServletRequest httpServletRequest;
 
     @Autowired
@@ -44,8 +56,11 @@ public class AdminController {
     @AdminPermission
     @GetMapping(value = "/home")
     public ModelAndView home() {
-        ModelAndView modelAndView = new ModelAndView("/admin/home");
+        ModelAndView modelAndView = new ModelAndView("admin/home");
         modelAndView.addObject("userCount",userService.countAllUser());
+        modelAndView.addObject("categoryCount",categoryService.countAllCategory());
+        modelAndView.addObject("sellerCount",sellerService.countAllSeller());
+        modelAndView.addObject("shopCount",shopService.countAllShop());
         modelAndView.addObject("CONTROLLER_NAME","admin");
         modelAndView.addObject("ACTION_NAME","home");
         return modelAndView;
@@ -53,7 +68,7 @@ public class AdminController {
 
     @GetMapping(value = "/loginpage")
     public ModelAndView loginPage() {
-        ModelAndView modelAndView = new ModelAndView("/admin/login");
+        ModelAndView modelAndView = new ModelAndView("admin/login");
         return modelAndView;
     }
 

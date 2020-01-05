@@ -164,7 +164,7 @@
 
   <select id="countAllUser" resultType="java.lang.Integer">
     select
-    count(*)
+    count(1)
     from user
   </select>
 </mapper>

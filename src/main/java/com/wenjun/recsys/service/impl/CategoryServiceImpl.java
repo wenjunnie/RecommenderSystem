@@ -34,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
         } catch (DuplicateKeyException e) {
             throw new BusinessException(EmBusinessError.CATEGORY_NAME_DUPLICATED);
         }
-        return categoryModel;
+        return get(categoryModel.getId());
     }
 
     @Override
@@ -45,5 +45,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryModel> selectAll() {
         return categoryModelMapper.selectAll();
+    }
+
+    @Override
+    public Integer countAllCategory() {
+        return categoryModelMapper.countAllCategory();
     }
 }

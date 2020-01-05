@@ -16,4 +16,6 @@ public interface CategoryService {
     CategoryModel get(Integer id);
     //查询所有品类
     List<CategoryModel> selectAll();
+    //统计类目数量
+    Integer countAllCategory();
 }

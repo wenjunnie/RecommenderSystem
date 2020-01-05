@@ -45,7 +45,7 @@ public class SellerController {
         List<SellerModel> sellerModelList = sellerService.selectAll();
         PageInfo<SellerModel> sellerModelPageInfo = new PageInfo<>(sellerModelList);
 
-        ModelAndView modelAndView = new ModelAndView("/seller/home");
+        ModelAndView modelAndView = new ModelAndView("seller/home");
         modelAndView.addObject("data",sellerModelPageInfo);
         modelAndView.addObject("CONTROLLER_NAME","seller");
         modelAndView.addObject("ACTION_NAME","home");
@@ -56,7 +56,7 @@ public class SellerController {
     @AdminPermission
     @GetMapping(value = "/createpage")
     public ModelAndView createPage() {
-        ModelAndView modelAndView = new ModelAndView("/seller/create");
+        ModelAndView modelAndView = new ModelAndView("seller/create");
         modelAndView.addObject("CONTROLLER_NAME","seller");
         modelAndView.addObject("ACTION_NAME","create");
         return modelAndView;

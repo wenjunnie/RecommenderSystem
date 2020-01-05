@@ -5,11 +5,11 @@ import com.github.pagehelper.PageInfo;
 import com.wenjun.recsys.aspect.AdminPermission;
 import com.wenjun.recsys.enums.EmBusinessError;
 import com.wenjun.recsys.error.BusinessException;
-import com.wenjun.recsys.model.CategoryModel;
-import com.wenjun.recsys.request.CategoryCreateReq;
+import com.wenjun.recsys.model.ShopModel;
 import com.wenjun.recsys.request.PageQuery;
+import com.wenjun.recsys.request.ShopCreateReq;
 import com.wenjun.recsys.response.CommonUtil;
-import com.wenjun.recsys.service.CategoryService;
+import com.wenjun.recsys.service.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -22,15 +22,15 @@ import java.util.List;
 
 /**
  * @Author: wenjun
- * @Date: 2020/1/5 14:49
+ * @Date: 2020/1/5 22:01
  */
 @RestController
-@RequestMapping("/admin/category")
+@RequestMapping("/admin/shop")
 @CrossOrigin(allowedHeaders = "*",allowCredentials = "true")
-public class CategoryController {
+public class ShopController {
 
     @Autowired
-    private CategoryService categoryService;
+    private ShopService shopService;
 
     @Autowired
     private HttpServletResponse httpServletResponse;
@@ -41,12 +41,12 @@ public class CategoryController {
     public ModelAndView home(PageQuery pageQuery) {
         //PageHelper分页
         PageHelper.startPage(pageQuery.getPage(),pageQuery.getSize());
-        List<CategoryModel> categoryModelList = categoryService.selectAll();
-        PageInfo<CategoryModel> categoryModelPageInfo = new PageInfo<>(categoryModelList);
+        List<ShopModel> shopModelList = shopService.selectAll();
+        PageInfo<ShopModel> shopModelPageInfo = new PageInfo<>(shopModelList);
 
-        ModelAndView modelAndView = new ModelAndView("category/home");
-        modelAndView.addObject("data",categoryModelPageInfo);
-        modelAndView.addObject("CONTROLLER_NAME","category");
+        ModelAndView modelAndView = new ModelAndView("shop/home");
+        modelAndView.addObject("data",shopModelPageInfo);
+        modelAndView.addObject("CONTROLLER_NAME","shop");
         modelAndView.addObject("ACTION_NAME","home");
         return modelAndView;
     }
@@ -55,8 +55,8 @@ public class CategoryController {
     @AdminPermission
     @GetMapping(value = "/createpage")
     public ModelAndView createPage() {
-        ModelAndView modelAndView = new ModelAndView("category/create");
-        modelAndView.addObject("CONTROLLER_NAME","category");
+        ModelAndView modelAndView = new ModelAndView("shop/create");
+        modelAndView.addObject("CONTROLLER_NAME","shop");
         modelAndView.addObject("ACTION_NAME","create");
         return modelAndView;
     }
@@ -64,15 +64,23 @@ public class CategoryController {
     //新增品类（不加@RequestBody默认为表单提交）
     @AdminPermission
     @PostMapping(value = "/create")
-    public void create(@Valid CategoryCreateReq categoryCreateReq, BindingResult bindingResult) throws BusinessException, IOException {
+    public void create(@Valid ShopCreateReq shopCreateReq, BindingResult bindingResult) throws BusinessException, IOException {
         if (bindingResult.hasErrors()) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, CommonUtil.processErrorString(bindingResult));
         }
-        CategoryModel categoryModel = new CategoryModel();
-        categoryModel.setName(categoryCreateReq.getName());
-        categoryModel.setIconUrl(categoryCreateReq.getIconUrl());
-        categoryModel.setSort(categoryCreateReq.getSort());
-        categoryService.create(categoryModel);
-        httpServletResponse.sendRedirect("/admin/category/home");
+        ShopModel shopModel = new ShopModel();
+        shopModel.setName(shopCreateReq.getName());
+        shopModel.setPricePerMan(shopCreateReq.getPricePerMan().intValue());
+        shopModel.setLatitude(shopCreateReq.getLatitude());
+        shopModel.setLongitude(shopCreateReq.getLongitude());
+        shopModel.setCategoryId(shopCreateReq.getCategoryId());
+        shopModel.setTags(shopCreateReq.getTags());
+        shopModel.setStartTime(shopCreateReq.getStartTime());
+        shopModel.setEndTime(shopCreateReq.getEndTime());
+        shopModel.setAddress(shopCreateReq.getAddress());
+        shopModel.setSellerId(shopCreateReq.getSellerId());
+        shopModel.setIconUrl(shopCreateReq.getIconUrl());
+        shopService.create(shopModel);
+        httpServletResponse.sendRedirect("/admin/shop/home");
     }
 }
