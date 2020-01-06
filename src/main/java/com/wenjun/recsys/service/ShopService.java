@@ -3,6 +3,7 @@ package com.wenjun.recsys.service;
 import com.wenjun.recsys.error.BusinessException;
 import com.wenjun.recsys.model.ShopModel;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -18,4 +19,6 @@ public interface ShopService {
     List<ShopModel> selectAll();
     //统计门店数量
     Integer countAllShop();
+    //推荐门店给用户
+    List<ShopModel> recommend(BigDecimal longitude, BigDecimal latitude);
 }

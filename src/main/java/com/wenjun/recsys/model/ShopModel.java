@@ -505,4 +505,6 @@ public class ShopModel {
     private SellerModel sellerModel;
 
     private CategoryModel categoryModel;
+
+    private Integer distance;
 }
