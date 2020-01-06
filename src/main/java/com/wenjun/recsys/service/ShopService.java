@@ -5,6 +5,7 @@ import com.wenjun.recsys.model.ShopModel;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: wenjun
@@ -19,6 +20,10 @@ public interface ShopService {
     List<ShopModel> selectAll();
     //统计门店数量
     Integer countAllShop();
-    //推荐门店给用户
+    //推荐门店给用户（推荐服务V1.0）
     List<ShopModel> recommend(BigDecimal longitude, BigDecimal latitude);
+    //搜索门店（搜索服务V1.0）
+    List<ShopModel> search(BigDecimal longitude, BigDecimal latitude, String keyword, Integer orderby, Integer categoryId, String tags);
+    //查询搜索后的标签集合
+    List<Map<String,Object>> searchGroupByTags(String keyword, Integer categoryId, String tags);
 }
