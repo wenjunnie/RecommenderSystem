@@ -10,6 +10,7 @@ import com.wenjun.recsys.service.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +54,27 @@ public class ShopController {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
         List<ShopModel> shopModelList = shopService.search(longitude,latitude,keyword,orderby,categoryId,tags);
+        List<CategoryModel> categoryModelList = categoryService.selectAll();
+        List<Map<String,Object>> tagsGroup = shopService.searchGroupByTags(keyword,categoryId,tags);
+        Map<String,Object> resMap = new HashMap<>();
+        resMap.put("shop",shopModelList);
+        resMap.put("category",categoryModelList);
+        resMap.put("tags",tagsGroup);
+        return CommonReturnType.create(resMap);
+    }
+
+    //搜索门店（搜索服务V2.0）
+    @GetMapping(value = "/searches")
+    public CommonReturnType searchES(@RequestParam(name = "longitude")BigDecimal longitude,
+                                   @RequestParam(name = "latitude") BigDecimal latitude,
+                                   @RequestParam(name = "keyword", required = false) String keyword,
+                                   @RequestParam(name = "orderby", required = false) Integer orderby,
+                                   @RequestParam(name = "categoryId", required = false) Integer categoryId,
+                                   @RequestParam(name = "tags", required = false) String tags) throws BusinessException, IOException {
+        if (longitude == null || latitude == null) {
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        }
+        List<ShopModel> shopModelList = (List<ShopModel>) shopService.searchES(longitude,latitude,keyword,orderby,categoryId,tags).get("shop");
         List<CategoryModel> categoryModelList = categoryService.selectAll();
         List<Map<String,Object>> tagsGroup = shopService.searchGroupByTags(keyword,categoryId,tags);
         Map<String,Object> resMap = new HashMap<>();

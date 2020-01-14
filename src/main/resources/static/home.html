@@ -455,7 +455,7 @@
             $.ajax({
                 type : "GET",
                 contentType : "application/json; charset=utf-8",
-                url : "/shop/search?keyword="+keyword+"&longitude="+longitude+"&latitude="+latitude+orderby+categoryFilter+tagFilter,
+                url : "/shop/searches?keyword="+keyword+"&longitude="+longitude+"&latitude="+latitude+orderby+categoryFilter+tagFilter,
                 success : function(data){
                     if(data.status === 'success'){
                         $("#guess").hide();
