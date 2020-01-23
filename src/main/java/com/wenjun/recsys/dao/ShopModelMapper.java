@@ -70,4 +70,6 @@ public interface ShopModelMapper {
     List<Map<String,Object>> searchGroupByTags(@Param("keyword") String keyword, @Param("categoryId") Integer categoryId, @Param("tags") String tags);
 
     List<Map<String,Object>> buildESQuery(@Param("sellerId") Integer sellerId, @Param("categoryId") Integer categoryId, @Param("shopId") Integer shopId);
+
+    ShopModel finalRecommend(@Param("longitude") BigDecimal longitude, @Param("latitude") BigDecimal latitude, @Param("shopId") Integer shopId);
 }

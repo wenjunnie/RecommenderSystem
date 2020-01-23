@@ -268,7 +268,7 @@
     ,ceil(1 + 1000*(2 * 6378.137* ASIN(SQRT(POW(SIN(PI() * (#{latitude} - latitude) / 360), 2) + COS(PI() * #{latitude} / 180)
     * COS(latitude* PI() / 180) * POW(SIN(PI() * (#{longitude} - longitude) / 360), 2))))) AS distance
     from shop
-    order by (0.95*1/log10(distance)+ 0.05*remark_score/5)  DESC
+    order by (0.95*1/log10(distance)+ 0.05*remark_score/5) DESC
   </select>
 
   <select id="search" resultMap="BaseResultMap">
@@ -320,5 +320,14 @@
     <if test="shopId != null">
       and a.id = #{shopId}
     </if>
+  </select>
+
+  <select id="finalRecommend" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    ,ceil(1 + 1000*(2 * 6378.137* ASIN(SQRT(POW(SIN(PI() * (#{latitude} - latitude) / 360), 2) + COS(PI() * #{latitude} / 180)
+    * COS(latitude* PI() / 180) * POW(SIN(PI() * (#{longitude} - longitude) / 360), 2))))) AS distance
+    from shop
+    where id = #{shopId}
   </select>
 </mapper>

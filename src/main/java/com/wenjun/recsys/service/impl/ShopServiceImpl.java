@@ -8,6 +8,8 @@ import com.wenjun.recsys.error.BusinessException;
 import com.wenjun.recsys.model.CategoryModel;
 import com.wenjun.recsys.model.SellerModel;
 import com.wenjun.recsys.model.ShopModel;
+import com.wenjun.recsys.recommend.RecommendService;
+import com.wenjun.recsys.recommend.RecommendSortService;
 import com.wenjun.recsys.service.CategoryService;
 import com.wenjun.recsys.service.SellerService;
 import com.wenjun.recsys.service.ShopService;
@@ -23,6 +25,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: wenjun
@@ -39,6 +42,12 @@ public class ShopServiceImpl implements ShopService {
 
     @Autowired
     private SellerService sellerService;
+
+    @Autowired
+    private RecommendService recommendService;
+
+    @Autowired
+    private RecommendSortService recommendSortService;
 
     @Autowired
     private RestHighLevelClient highLevelClient;
@@ -142,11 +151,16 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public List<ShopModel> recommend(BigDecimal longitude, BigDecimal latitude) {
-        List<ShopModel> shopModelList = shopModelMapper.recommend(longitude,latitude);
-        shopModelList.forEach(shopModel -> {
-            shopModel.setSellerModel(sellerService.get(shopModel.getSellerId()));
-            shopModel.setCategoryModel(categoryService.get(shopModel.getCategoryId()));
-        });
+        //ALS召回，ALS结果在本地离线生成并存入数据库
+        List<Integer> shopIdList = recommendService.recall(99999);
+        //LR排序
+        //shopIdList = recommendSortService.sort(shopIdList,99999);
+        List<ShopModel> shopModelList = shopIdList.stream().map(id -> shopModelMapper.finalRecommend(longitude,latitude,id)).collect(Collectors.toList());
+//        List<ShopModel> shopModelList = shopModelMapper.recommend(longitude,latitude);
+//        shopModelList.forEach(shopModel -> {
+//            shopModel.setSellerModel(sellerService.get(shopModel.getSellerId()));
+//            shopModel.setCategoryModel(categoryService.get(shopModel.getCategoryId()));
+//        });
         return shopModelList;
     }
 

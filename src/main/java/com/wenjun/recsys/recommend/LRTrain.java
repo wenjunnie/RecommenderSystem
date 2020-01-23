@@ -49,7 +49,7 @@ public class LRTrain {
         });
         //得到Dataset<Row>
         Dataset<Row> data = spark.createDataFrame(rowJavaRDD,scheme);
-        //分开测试和训练集
+        //分开测试和训练集，80%的数据训练，20%的数据测试
         Dataset<Row>[] splits = data.randomSplit(new double[]{0.8,0.2});
         Dataset<Row> trainingData = splits[0];
         Dataset<Row> testingData = splits[1];
