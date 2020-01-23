@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
+ * ALS召回算法的预测
  * @Author: wenjun
  * @Date: 2020/1/22 21:06
  */
@@ -96,13 +97,13 @@ public class AlsRecallPredict {
         }
 
         //csv文件内容转换（"1","319","1"）
-        public static AlsRecall.Rating pauseRating(String str) {
+        public static Rating pauseRating(String str) {
             str = str.replace("\"","");
             String[] strArr = str.split(",");
             Integer userId = Integer.valueOf(strArr[0]);
             Integer shopId = Integer.valueOf(strArr[1]);
             Integer rating = Integer.valueOf(strArr[2]);
-            return new AlsRecall.Rating(userId,shopId,rating);
+            return new Rating(userId,shopId,rating);
         }
     }
 }

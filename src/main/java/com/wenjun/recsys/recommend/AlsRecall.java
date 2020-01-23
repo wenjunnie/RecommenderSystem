@@ -44,6 +44,8 @@ public class AlsRecall implements Serializable {
                 .setUserCol("userId").setItemCol("shopId").setRatingCol("rating");
         //模型训练
         ALSModel alsModel = als.fit(trainingData);
+        //保存模型
+        alsModel.write().overwrite().save("C:\\Users\\Salt-Fish\\Desktop\\alsmodel");
         //模型评测
         Dataset<Row> predictions = alsModel.transform(testingData);
         //rmse均方根误差，预测值与真实值的偏差的平方除以观测次数，开个根号（rmse越小，预测值与真实值越接近）
@@ -51,8 +53,6 @@ public class AlsRecall implements Serializable {
                 .setLabelCol("rating").setPredictionCol("prediction");
         double rmse = evaluator.evaluate(predictions);
         System.out.println("rmse= " + rmse);
-        //windows系统下会出错
-        alsModel.save("C:\\Users\\Salt-Fish\\Desktop\\alsmodel");
     }
 
     @Data
