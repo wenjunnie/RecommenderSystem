@@ -41,6 +41,7 @@ public class UserController {
         return CommonReturnType.create(userModel);
     }
 
+    //用户注册（加了@RequestBody的话数据格式为application/json）
     @PostMapping(value = "/register")
     public CommonReturnType register(@Valid @RequestBody RegisterReq registerReq, BindingResult bindingResult) throws BusinessException {
         //若校验出错则将出错结果返回前端

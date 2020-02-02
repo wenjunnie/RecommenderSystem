@@ -44,12 +44,14 @@ public class AlsRecallPredict {
         Dataset<Row> users = rating.select(alsModel.getUserCol()).distinct().limit(5);
         //每个用户推荐20家门店
         Dataset<Row> userRecs = alsModel.recommendForUserSubset(users,20);
+        //给所有用户做离线的召回结果预测，每个用户推荐20家门店
+        //Dataset<Row> userRecs = alsModel.recommendForAllUsers(20);
         userRecs.foreachPartition(new ForeachPartitionFunction<Row>() {
             @Override
             public void call(Iterator<Row> iterator) throws Exception {
                 //新建数据库连接
                 Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1/recsys?user=root&password=nie970309&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai");
-                PreparedStatement preparedStatement = connection.prepareStatement("insert into recommend(id,recommend) values (?,?)");
+                PreparedStatement preparedStatement = connection.prepareStatement("replace into recommend(id,recommend) values (?,?)");
 
                 List<Map<String,Object>> data = new ArrayList<>();
 

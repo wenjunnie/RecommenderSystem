@@ -1,0 +1,116 @@
+============ElasticSearch=============
+cd config
+vim elasticsearch.yml
+network.host: 0.0.0.0
+cluster.name: recsys
+node.name: node-1
+http.port: 9200
+transport.tcp.port: 9300（ADD）
+========跨域===========
+http.cors.enabled: true（ADD）
+http.cors.allow-origin: "*"（ADD）
+discovery.seed_hosts: ["127.0.0.1:9300", "127.0.0.1:9301", "127.0.0.1:9302"]
+cluster.initial_master_nodes: ["node-1", "node-2", "node-3"]
+#cluster.initial_master_nodes: ["127.0.0.1:9300", "127.0.0.1:9301", "127.0.0.1:9302"]
+========COPY==========
+node.name: node-2
+http.port: 9201
+transport.tcp.port: 9301
+========COPY==========
+node.name: node-3
+http.port: 9202
+transport.tcp.port: 9302
+========后台启动========
+vim /etc/sysctl.conf（外网访问需要修改）
+vm.max_map_count = 262144
+vim /etc/security/limits.conf
+*  soft  nofile  65536
+*  hard  nofile  65536
+*  soft  nproc   4096
+*  hard  nproc   4096
+sysctl -p
+useradd wenjun
+chown -R wenjun elasticsearch-7.5.1
+su wenjun
+cd elasticsearch-7.5.1
+vim config/jvm.options
+-Xms200m
+-Xmx200m
+bin/elasticsearch -d
+========IK分词器========
+bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.5.1/elasticsearch-analysis-ik-7.5.1.zip
+（下载龟速，可直接在码云上下载压缩包并解压到plugins目录下）
+========kibana外网访问========
+vim config/kibana.yml
+server.host: "0.0.0.0"
+========logstash（MySQL同步到Elasticsearch）=================
+bin/logstash-plugin install logstash-input-jdbc
+cd bin
+mkdir mysql
+vim jdbc.conf
+input {
+    jdbc {
+      jdbc_default_timezone => "Asia/Shanghai"
+      jdbc_connection_string => "jdbc:mysql://127.0.0.1/recsys?characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai"
+      jdbc_user => "root"
+      jdbc_password => "nie970309"
+      jdbc_driver_library => "/var/local/logstash/bin/mysql/mysql-connector-java-8.0.18.jar"
+      jdbc_driver_class => "com.mysql.cj.jdbc.Driver"
+      jdbc_paging_enabled => "true"
+      jdbc_page_size => "50000"
+      last_run_metadata_path => "/var/local/logstash/bin/mysql/last_value_meta" 
+      statement_filepath => "/var/local/logstash/bin/mysql/jdbc.sql"
+      schedule => "* * * * *"
+    }
+}
+
+output {
+    elasticsearch {
+        hosts => ["localhost:9200"]
+        index => "shop"
+        document_type => "_doc"
+        document_id => "%{id}"
+    }
+    stdout {
+        codec => json_lines
+    }
+}
+vim jdbc.sql
+select a.id,a.name,a.tags,concat(a.latitude,',',a.longitude) as location,a.remark_score,a.price_per_man,a.category_id,
+b.name as category_name,a.seller_id,c.remark_score as seller_remark_score,c.disabled_flag as seller_disabled_flag 
+from shop a inner join category b on a.category_id = b.id inner join seller c on c.id = a.seller_id 
+where a.updated > :sql_last_value or b.updated > :sql_last_value or c.updated > :sql_last_value
+vim config/jvm.options
+-Xms128m
+-Xmx128m
+./logstash -f mysql/jdbc.conf
+========定制化分词器==================================
+cd plugins/analysis-ak/config
+vim new_word.dic
+凯悦
+vim IKAnalyzer.cfg.xml
+<entry key="ext_dict">new_word.dic</entry>
+索引同步（POST）
+========同义词======================================
+vim synonyms.txt
+凯悦,红星,方块
+重构索引
+========canal=======================================
+cd /usr/local/mysql
+vim my.ini（windows在ProgramData目录下，Linux在/etc/my.cnf）
+[mysqld]
+sql_mode = NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+server-id = 1
+binlog_format = ROW
+log_bin = mysql_bin
+重启mysql服务
+mysql -uroot -pnie970309
+show variables like 'log_bin';
+grant select,replication slave,replication client on *.* to 'canal'@'%' identified by 'canal';
+grant select,replication slave,replication client on *.* to 'canal'@'localhost' identified by 'canal';（必须有）
+flush privileges;
+========canal.deployer=================================
+cd conf/example
+vim instance.properties
+canal.instance.mysql.slaveId=2
+bin/startup.sh

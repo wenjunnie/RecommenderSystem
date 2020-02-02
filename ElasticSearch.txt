@@ -1,0 +1,951 @@
+===================基础语法===============
+DELETE employee
+
+#非结构化方式新建索引
+PUT /employee
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  }
+}
+
+PUT /employee/_doc/1
+{
+  "name":"凯杰",
+  "age":30
+}
+
+#全量修改，覆盖所有字段
+PUT /employee/_doc/1
+{
+  "name":"凯杰2"
+}
+
+#指定字段修改
+POST /employee/_update/1
+{
+  "doc": {
+    "name":"凯杰2"
+  }
+}
+
+#强制指定创建，若已存在，则失败
+POST /employee/_create/4
+{
+  "name":"兄长2",
+  "age":31
+}
+
+#获取索引记录
+GET /employee/_doc/1
+
+#删除某个文档
+DELETE /employee/_doc/2
+
+#查询全都文档
+GET /employee/_search
+
+#使用结构化的方式创建索引
+PUT /employee
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "name":{"type": "text"},
+      "age":{"type": "integer"}
+    }
+  }
+}
+
+PUT /employee/_doc/1
+{
+  "name":"兄弟",
+  "age":30
+}
+
+#不带条件查询所有记录
+GET /employee/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+#分页查询
+GET /employee/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "from": 0,
+  "size": 2
+}
+
+#带关键字条件的查询
+GET /employee/_search
+{
+  "query": {
+    "match": {
+      "name": "兄"
+    }
+  }
+}
+
+#待排序的查询
+GET /employee/_search
+{
+  "query": {
+    "match": {
+      "name": "兄"
+    }
+  },
+  "sort": [
+    {
+      "age": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+#带过滤
+#"match"会将输入分词，"term"不会
+GET /employee/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {"term":{"age":30}}
+      ]
+    }
+  }
+}
+
+#带聚合
+GET /employee/_search
+{
+  "query": {
+    "match": {
+      "name": "兄"
+    }
+  },
+  "sort": [
+    {
+      "age": {
+        "order": "desc"
+      }
+    }
+  ],
+  "aggs": {
+    "group_by_age": {
+      "terms": {
+        "field": "age"
+      }
+    }
+  }
+}
+===================高级语法===============
+#新建一个索引
+PUT /movie/_doc/1
+{
+  "name":"Eating an apple a day & keeps doctor away"
+}
+
+GET /movie/_search
+{
+  "query": {
+    "match": {
+      "name": "eat"
+    }
+  }
+}
+
+#使用analyze api查看分词状态
+#标准analyze(分词)的过程:字符过滤器(过滤特殊符号)->字符处理->分词过滤(分词转换:变小写)
+GET /movie/_analyze
+{
+  "field": "name",
+  "text": "Eating an apple a day & keeps doctor away"
+}
+
+DELETE /movie
+
+#使用结构化的方式重新创建索引(使用English分词器)
+PUT /movie
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "name":{"type": "text","analyzer": "english"}
+    }
+  }
+}
+
+PUT /movie/_doc/1
+{
+  "name":"Eating an apple a day & keeps doctor away"
+}
+
+#english analyze(分词)的过程:字符过滤器(过滤特殊符号外加量词,the等等)->字符处理->分词过滤(分词转换:词干转化),忽略大小写
+GET /movie/_analyze
+{
+  "field": "name",
+  "text": "Eating an apple a day & keeps doctor away"
+}
+
+GET /movie/_search
+{
+  "query": {
+    "match": {
+      "name": "apples"
+    }
+  }
+}
+
+==============================进阶==============================
+#玩转tmdb
+PUT /movie
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "title":{"type": "text","analyzer": "english"},
+      "tagline":{"type": "text","analyzer": "english"},
+      "release_date":{"type": "date","format": "8yyyy/MM/dd || yyyy/M/dd || yyyy/MM/d || yyyy/M/d"},
+      "popularity":{"type": "double"},
+      "overview":{"type": "text","analyzer": "english"},
+      "cast":{
+        "type": "object",
+        "properties": {
+          "character":{"type": "text","analyzer": "standard"},
+          "name":{"type": "text","analyzer": "standard"}
+        }
+      }
+    }
+  }
+}
+
+GET /movie/_search
+
+#搜索内容 match,按照字段上的定义的分词分析后去索引内查询
+GET /movie/_search
+{
+  "query": {
+    "match": {
+      "title": "steve zissou"
+    }
+  }
+}
+
+GET /movie/_analyze
+{
+  "field": "title",
+  "text": "steve zissou"
+}
+
+#term查询,不进行分词的分析,直接去索引内查询
+GET /movie/_search
+{
+  "query": {
+    "term": {
+      "title": "steve zissou"
+    }
+  }
+}
+
+#分词后的and和or的逻辑,match默认使用的是or
+GET /movie/_search
+{
+  "query": {
+    "match": {
+      "title": "basketball with cartoon aliens"
+    }
+  }
+}
+
+#改成and
+GET /movie/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "basketball with cartoon aliens",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+#最小词匹配项
+GET /movie/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "basketball with cartoon aliens",
+        "operator": "or",
+        "minimum_should_match": 2
+      }
+    }
+  }
+}
+  
+#短语查询
+GET /movie/_search
+{
+  "query": {
+    "match_phrase": {
+      "title": "steve zissou"
+    }
+  }
+}
+
+#多字段查询
+GET /movie/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title","overview"]
+    }
+  }
+}
+
+#使用Elasticsearch解释器查看score计算过程
+GET /movie/_search
+{
+  "explain": true, 
+  "query": {
+    "match": {
+      "title": "steve"
+    }
+  }
+}
+
+#score=Max(title,overview)
+GET /movie/_search
+{
+  "explain": true, 
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title","overview"]
+    }
+  }
+}
+
+#优化多字段查询
+#score=Max(title*10,overview)
+GET /movie/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title^10","overview"]
+    }
+  }
+}
+
+#score=title*10+overview*0.3
+GET /movie/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title^10","overview"],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+#bool查询
+#must:必须都为true
+#mustnot:必须都为false
+#should:其中一个为true即可
+#为true的越多则得分越高
+
+#score=sum(title,overview)
+GET /movie/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"title": "basketball with cartoon aliens"}},
+        {"match": {"overview": "basketball with cartoon aliens"}}
+      ]
+    }
+  }
+}
+
+#不同的multi_query其实是有不同的type
+#best_fields:默认的得分方式,取得最高的得分作为对应文档的对应分数,"最匹配模式"
+GET /movie/_search
+{
+  "explain": true, 
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title","overview"],
+      "type": "best_fields"
+    }
+  }
+}
+
+#dis_max方式,结果同上
+GET /movie/_search
+{
+  "explain": true, 
+  "query": {
+    "dis_max": {
+      "queries": [
+        {"match": {"title": "basketball with cartoon aliens"}},
+        {"match": {"overview": "basketball with cartoon aliens"}}
+      ]
+    }
+  }
+}
+
+#结果同上,best_fields模式
+GET /movie/_validate/query?explain
+{
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title","overview"],
+      "type": "best_fields"
+    }
+  }
+}
+
+#most_fields:考虑绝大多数(所有的)文档的字段得分相加,获得我们想要的结果
+GET /movie/_search
+{
+  "explain": true, 
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title","overview"],
+      "type": "most_fields"
+    }
+  }
+}
+
+GET /movie/_validate/query?explain
+{
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoon aliens",
+      "fields": ["title","overview"],
+      "type": "most_fields"
+    }
+  }
+}
+
+#cross_fields:以分词为单位计算栏位的总分,适用于词导向的匹配
+#score=title(max(steve,job))+overview(max(steve,job))
+GET /movie/_search
+{
+  "explain": true, 
+  "query": {
+    "multi_match": {
+      "query": "steve job",
+      "fields": ["title","overview"],
+      "type": "cross_fields"
+    }
+  }
+}
+
+GET /movie/_validate/query?explain
+{
+  "query": {
+    "multi_match": {
+      "query": "steve job",
+      "fields": ["title","overview"],
+      "type": "cross_fields"
+    }
+  }
+}
+
+#query string
+#方便的利用 AND OR NOT
+GET /movie/_search
+{
+  "query": {
+    "query_string": {
+      "fields": ["title"],
+      "query": "steve AND job"
+    }
+  }
+}
+
+#filter过滤查询
+#单条件过滤
+GET /movie/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "term": {
+          "title": "steve"
+        }
+      }
+    }
+  }
+}
+
+#多条件过滤
+GET /movie/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"title": "steve"}},
+        {"term": {"cast.name": "gaspard"}},
+        {"range": {"release_date": {"lte": "2015/01/01"}}},
+        {"range": {"popularity": {"gte": "25"}}}
+      ]
+    }
+  },
+  "sort": [
+    {
+      "popularity": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+#带match打分的filter,此时score有分数(不为0分)
+GET /movie/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"title": "life"}}
+      ], 
+      "filter": [
+        {"term": {"title": "steve"}},
+        {"term": {"cast.name": "gaspard"}},
+        {"range": {"release_date": {"lte": "2015/01/01"}}},
+        {"range": {"popularity": {"gte": "25"}}}
+      ]
+    }
+  }
+}
+
+#查全率和查准率
+#function_score
+GET /movie/_search
+{
+  "explain": true, 
+  "query": {
+    "function_score": {
+      //原始查询得到的oldScore
+      "query": {
+        "multi_match": {
+        "query": "steve job",
+        "fields": ["title","overview"],
+        "operator": "or",
+        "type": "most_fields"
+        }
+      },
+      "functions": [
+        {
+          "field_value_factor": {
+            "field": "popularity", //对应要调整处理的字段
+            "modifier": "log2p",
+            "factor": 10
+          }
+        },
+        {
+          "field_value_factor": {
+            "field": "popularity", //对应要调整处理的字段
+            "modifier": "log2p",
+            "factor": 5
+          }
+        }
+      ],
+      "score_mode": "sum", //不同的field value之间得分相加,默认为相乘
+      "boost_mode": "sum" //最后再与oldScore value相加,默认为相乘
+    }
+  } 
+}
+
+#测试ik分词器,智能分词法
+GET _analyze?pretty
+{
+  "analyzer": "ik_smart",
+  "text": "中华人民共和国国歌"
+}
+
+#最大化分词
+GET _analyze?pretty
+{
+  "analyzer": "ik_max_word",
+  "text": "中华人民共和国国歌"
+}
+
+GET _analyze?pretty
+{
+  "analyzer": "standard",
+  "text": "中华人民共和国国歌"
+}
+
+#analyzer指定的是构建索引的时候的分词
+#search_analyzer指定的是搜索关键字时候的分词
+
+#最佳实践:索引的时候使用max_word,但是查询的时候使用smartword
+
+=================================================================
+#定义门店的索引结果
+PUT /shop
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "id": {"type": "integer"},
+      "name": {"type": "text","analyzer": "ik_max_word","search_analyzer": "ik_smart"},
+      "tags": {"type": "text","analyzer": "whitespace","fielddata": true},
+      "location": {"type": "geo_point"},
+      "remark_score": {"type": "double"},
+      "price_pre_man": {"type": "integer"},
+      "category_id": {"type": "integer"},
+      "category_name": {"type": "keyword"},
+      "seller_id": {"type": "integer"},
+      "seller_remark_score": {"type": "double"},
+      "seller_disabled_flag": {"type": "integer"}
+    }
+  }
+}
+
+#定义支持同义词的门店的索引结果
+PUT /shop
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1,
+    "analysis": {
+      "filter": {
+        "my_synonym_filter": {
+          "type":"synonym",
+          "synonyms_path":"synonyms.txt"
+        }
+      },
+      "analyzer": {
+        "ik_syno": {
+          "type": "custom",
+          "tokenizer": "ik_smart",
+          "filter": ["my_synonym_filter"]
+        },
+        "ik_syno_max": {
+          "type": "custom",
+          "tokenizer": "ik_max_word",
+          "filter": ["my_synonym_filter"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": {"type": "integer"},
+      "name": {"type": "text","analyzer": "ik_syno_max","search_analyzer": "ik_syno"},
+      "tags": {"type": "text","analyzer": "whitespace","fielddata": true},
+      "location": {"type": "geo_point"},
+      "remark_score": {"type": "double"},
+      "price_pre_man": {"type": "integer"},
+      "category_id": {"type": "integer"},
+      "category_name": {"type": "keyword"},
+      "seller_id": {"type": "integer"},
+      "seller_remark_score": {"type": "double"},
+      "seller_disabled_flag": {"type": "integer"}
+    }
+  }
+}
+
+GET /shop/_search
+
+GET /shop/_search
+{
+  "query": {
+    "match": {
+      "name": "凯悦"
+    }
+  }
+}
+
+#带上距离字段
+GET /shop/_search
+{
+  "query": {
+    "match": {
+      "name": "凯悦"
+    }
+  },
+  "_source": "*", 
+  "script_fields": {
+    "distance": {
+      "script": {
+        "source": "haversin(lat,lon,doc['location'].lat,doc['location'].lon)",
+        "lang": "expression",
+        "params": {"lat":31.37,"lon":127.21}
+      }
+    }
+  }
+}
+
+#使用距离字段排序
+GET /shop/_search
+{
+  "query": {
+    "match": {
+      "name": "凯悦"
+    }
+  },
+  "_source": "*", 
+  "script_fields": {
+    "distance": {
+      "script": {
+        "source": "haversin(lat,lon,doc['location'].lat,doc['location'].lon)",
+        "lang": "expression",
+        "params": {"lat":28.05,"lon":115.55}
+      }
+    }
+  },
+  "sort": [
+    {
+      "_geo_distance": {
+        "location": {
+          "lat": 28.05,
+          "lon": 115.55
+        },
+        "order": "asc",
+        "unit": "km",
+        "distance_type": "arc"
+      }
+    }
+  ]
+}
+
+#使用function score解决排序模型
+GET /shop/_search
+{
+  "_source": "*",
+  "script_fields": {
+    "distance": {
+      "script": {
+        "source": "haversin(lat,lon,doc['location'].lat,doc['location'].lon)",
+        "lang": "expression",
+        "params": {"lat":28.05,"lon":115.55}
+      }
+    }
+  },
+  "query": {
+    "function_score": {
+      "query": {
+        "bool": {
+          "must": [
+            {"match": {"name": {"query": "凯悦","boost": 0.1}}},
+            {"term": {"seller_disabled_flag": 0}},
+            {"term": {"category_id": 1}},
+            {"term": {"tags": "落地大窗"}}
+          ]
+        }
+      },
+      "functions": [
+        {
+          "gauss": {
+            "location": {
+              "origin": "28.05,115.55",
+              "scale": "100km",
+              "offset": "0km",
+              "decay": 0.5
+            }
+          },
+          "weight": 9
+        },
+        {
+          "field_value_factor": {
+            "field": "remark_score"
+          },
+          //权重，结果为remark_score/5
+          "weight": 0.2
+        },
+        {
+          "field_value_factor": {
+            "field": "seller_remark_score"
+          },
+          "weight": 0.1
+        }
+      ],
+      "score_mode": "sum",
+      "boost_mode": "sum"
+    }
+  },
+  "sort": [
+    {
+      "_score": {
+        "order": "desc"
+      }
+    }
+  ],
+  "aggs": {
+    "group_by_tags": {
+      "terms": {
+        "field": "tags"
+      }
+    }
+  }
+}
+
+#相关性重塑
+GET /shop/_search
+{
+  "_source": "*",
+  "script_fields": {
+    "distance": {
+      "script": {
+        "source": "haversin(lat,lon,doc['location'].lat,doc['location'].lon)",
+        "lang": "expression",
+        "params": {"lat":28.05,"lon":115.55}
+      }
+    }
+  },
+  "query": {
+    "function_score": {
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "bool": {
+                "should": [
+                  {"match": {"name": {"query": "住宿","boost": 0.1}}},
+                  //排序权重在functions中改
+                  {"term": {"category_id": {"value": 2,"boost": 0}}}
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "gauss": {
+            "location": {
+              "origin": "28.05,115.55",
+              "scale": "100km",
+              "offset": "0km",
+              "decay": 0.5
+            }
+          },
+          "weight": 9
+        },
+        {
+          "field_value_factor": {
+            "field": "remark_score"
+          },
+          //权重，结果为remark_score/5
+          "weight": 0.2
+        },
+        {
+          "field_value_factor": {
+            "field": "seller_remark_score"
+          },
+          "weight": 0.1
+        },
+        {
+          "filter": {
+            "term": {"category_id": 2}
+          },
+          "weight": 0.2
+        }
+      ],
+      "score_mode": "sum",
+      "boost_mode": "sum"
+    }
+  },
+  "sort": [
+    {
+      "_score": {
+        "order": "desc"
+      }
+    }
+  ],
+  "aggs": {
+    "group_by_tags": {
+      "terms": {
+        "field": "tags"
+      }
+    }
+  }
+}
+
+#低价排序
+GET /shop/_search
+{
+  "_source": "*",
+  "script_fields": {
+    "distance": {
+      "script": {
+        "source": "haversin(lat,lon,doc['location'].lat,doc['location'].lon)",
+        "lang": "expression",
+        "params": {"lat":28.05,"lon":115.55}
+      }
+    }
+  },
+  "query": {
+    "function_score": {
+      "query": {
+        "bool": {
+          "must": [
+            {"match": {"name": {"query": "凯悦","boost": 0.1}}},
+            {"term": {"seller_disabled_flag": 0}},
+            {"term": {"category_id": 2}}
+          ]
+        }
+      },
+      "functions": [
+        {
+          "field_value_factor": {
+            "field": "price_per_man"
+          },
+          "weight": 1
+        }
+      ],
+      "score_mode": "sum",
+      "boost_mode": "replace"
+    }
+  },
+  "sort": [
+    {
+      "_score": {
+        "order": "asc"
+      }
+    }
+  ]
+}
+
+#定制化分词器重构索引
+POST /shop/_update_by_query
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"term": {"name": "凯"}},
+        {"term": {"name": "悦"}}
+      ]
+    }
+  }
+}

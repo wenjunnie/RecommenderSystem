@@ -61,7 +61,7 @@ public class CategoryController {
         return modelAndView;
     }
 
-    //新增品类（不加@RequestBody默认为表单提交）
+    //新增品类（不加@RequestBody默认为表单提交，即加了@RequestBody的话数据格式为application/json，否则为application/x-www-form-urlencoded）
     @AdminPermission
     @PostMapping(value = "/create")
     public void create(@Valid CategoryCreateReq categoryCreateReq, BindingResult bindingResult) throws BusinessException, IOException {

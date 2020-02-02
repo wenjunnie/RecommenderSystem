@@ -35,7 +35,7 @@ public class ShopController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
-    //品类列表
+    //门店列表
     @AdminPermission
     @GetMapping(value = "/home")
     public ModelAndView home(PageQuery pageQuery) {
@@ -51,7 +51,7 @@ public class ShopController {
         return modelAndView;
     }
 
-    //新增品类界面
+    //新增门店界面
     @AdminPermission
     @GetMapping(value = "/createpage")
     public ModelAndView createPage() {
@@ -61,7 +61,7 @@ public class ShopController {
         return modelAndView;
     }
 
-    //新增品类（不加@RequestBody默认为表单提交）
+    //新增门店（不加@RequestBody默认为表单提交，即加了@RequestBody的话数据格式为application/json，否则为application/x-www-form-urlencoded）
     @AdminPermission
     @PostMapping(value = "/create")
     public void create(@Valid ShopCreateReq shopCreateReq, BindingResult bindingResult) throws BusinessException, IOException {

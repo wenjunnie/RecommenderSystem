@@ -37,7 +37,7 @@ public class RecommendSortService implements Serializable {
         List<ShopSortModel> list = new ArrayList<>();
         for (Integer shopId : shopIdList) {
             //造的假数据，可以从数据库或缓存中拿到对应的性别，年龄，评分，价格等做特征转化生成feature向量
-            Vector v = Vectors.dense(1,0,0,0,0,1,0,6,0,0,1,0);
+            Vector v = Vectors.dense(1,0,0,0,0,1,0.6,0,0,1,0);
             Vector result = lrModel.predictProbability(v);
             double[] arr = result.toArray();
             double score = arr[1];
